@@ -1,8 +1,26 @@
+# Based on the work of Marcel and his article: https://blog.itprocloud.de/Using-FSLogix-file-shares-with-Azure-AD-cloud-identities-in-Azure-Virtual-Desktop-AVD/
+# Modified by: Dominic Böttger
+#
+# Add Parameters for the script all parameters are mandatory
+# - fileServer: The name of the file server
+# - profileShare: The connection string to the profile share
+# - user: The user name to access the file server
+# - secret: The password to access the file server
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$fileserver,
+    [Parameter(Mandatory=$true)]
+    [string]$profileshare,
+    [Parameter(Mandatory=$true)]
+    [string]$user,
+    [Parameter(Mandatory=$true)]
+    [string]$secret
+)
 
 New-Item -Path "HKLM:\SOFTWARE" -Name "FSLogix" -ErrorAction Ignore
 New-Item -Path "HKLM:\SOFTWARE\FSLogix" -Name "Profiles" -ErrorAction Ignore
 New-ItemProperty -Path "HKLM:\SOFTWARE\FSLogix\Profiles" -Name "AccessNetworkAsComputerObject" -Value 1 -force
-New-ItemProperty -Path "HKLM:\SOFTWARE\FSLogix\Profiles" -Name "CCDLocations" -Value $profileShare -force
+New-ItemProperty -Path "HKLM:\SOFTWARE\FSLogix\Profiles" -Name "CCDLocations" -Value $profileshare -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\FSLogix\Profiles" -Name "DeleteLocalProfileWhenVHDShouldApply" -Value 1 -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\FSLogix\Profiles" -Name "Enabled" -Value 1 -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\FSLogix\Profiles" -Name "FlipFlopProfileDirectoryName" -Value 1 -force
@@ -17,7 +35,7 @@ New-ItemProperty -Path "HKLM:\SOFTWARE\FSLogix\Profiles" -Name "PreventLoginWith
 New-Item -Path "HKLM:\SOFTWARE\Policies" -Name "FSLogix" -ErrorAction Ignore
 New-Item -Path "HKLM:\SOFTWARE\Policies\FSLogix" -Name "ODFC" -ErrorAction Ignore
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "AccessNetworkAsComputerObject" -Value 1 -force
-New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "CCDLocations" -Value $profileShare -force
+New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "CCDLocations" -Value $profileshare -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "Enabled" -Value 1 -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "FlipFlopProfileDirectoryName" -Value 1 -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "HealthyProvidersRequiredForRegister" -Value 1 -force
@@ -36,7 +54,7 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\frxccd\Parameter
 
 
 # Store credentials to access the storage account
-cmdkey.exe /add:$fileServer /user:$($user) /pass:$($secret)
+cmdkey.exe /add:$fileserver /user:$($user) /pass:$($secret)
 # Disable Windows Defender Credential Guard (only needed for Windows 11 22H2)
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "LsaCfgFlags" -Value 0 -force
 
