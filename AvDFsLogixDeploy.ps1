@@ -14,7 +14,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$user,
     [Parameter(Mandatory=$true)]
-    [string]$secret
+    [string]$secret,
     [Parameter(Mandatory=$true)]
     [string]$sharename
 )
