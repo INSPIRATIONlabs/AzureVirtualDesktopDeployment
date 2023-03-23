@@ -68,10 +68,10 @@ if (!$roleAssignment) {
 $subscriptionId = (Get-AzContext).Subscription.Id
 $tenantId = (Get-AzContext).Subscription.TenantId
 
-# set the federatedIdentityCredentials to the Azure AD application
-New-AzADAppFederatedCredential -Name $repo$branch -ApplicationObjectId $appObjectId -Issuer "https://token.actions.githubusercontent.com" -Subject "repo:$organization/$repo:ref:refs/heads/$branch" -Audience "api://AzureADTokenExchange"
+$subject = "repo:$organization/$repo" + ":ref:refs/heads/$branch"
 
-Invoke-AzRestMethod -Method POST -Uri 'https://graph.microsoft.com/beta/applications/$clientId/federatedIdentityCredentials' -Payload  '{"name":"GithubAction","issuer":"https://token.actions.githubusercontent.com","subject":"repo:$organization/$repo:ref:refs/heads/$branch","description":"Production","audiences":["api://AzureADTokenExchange"]}'
+# set the federatedIdentityCredentials to the Azure AD application
+New-AzADAppFederatedCredential -Name $repo$branch -ApplicationObjectId $appObjectId -Issuer "https://token.actions.githubusercontent.com" -Subject $subject -Audience "api://AzureADTokenExchange"
 
 # set the secrets
 gh secret set AZURE_CLIENT_ID -b $clientId -R $organization/$repo
