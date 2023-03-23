@@ -38,7 +38,7 @@ $application = New-AzADApplication -DisplayName $appname
 # Create Service Principal
 $clientId = $application.AppId
 $appObjectId = $application.Id
-$objectId = New-AzADServicePrincipal -ApplicationId $clientId[0]
+$objectId = New-AzADServicePrincipal -ApplicationId $clientId
 
 # Assign the Contributor Role
 # This is assigned to the current Subscription
@@ -60,5 +60,3 @@ gh api -X PUT repos/$organization/$repo/actions/secrets/AZURE_CLIENT_ID -f value
 gh api -X PUT repos/$organization/$repo/actions/secrets/AZURE_TENANT_ID -f value=$tenantId
 # AZURE_SUBSCRIPTION_ID
 gh api -X PUT repos/$organization/$repo/actions/secrets/AZURE_SUBSCRIPTION_ID -f value=$subscriptionId
-
-
