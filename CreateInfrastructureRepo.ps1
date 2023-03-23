@@ -32,17 +32,37 @@ gh auth login
 # Create new private github repository in the organization
 gh repo create $organization/$repo --private --confirm
 
-# Create new Azure AD application
-$application = New-AzADApplication -DisplayName $appname
+# check if there is already an app with the same name
+$application = (Get-AzADApplication -DisplayName $appname)[0]
+
+# create application if it does not exist
+if (!$application) {
+    # Create new Azure AD application
+    $application = New-AzADApplication -DisplayName $appname
+}
 
 # Create Service Principal
 $clientId = $application.AppId
 $appObjectId = $application.Id
-$objectId = New-AzADServicePrincipal -ApplicationId $clientId
 
-# Assign the Contributor Role
-# This is assigned to the current Subscription
-New-AzRoleAssignment -ObjectId $objectId -RoleDefinitionName Contributor
+# check if there is already a service principal with the same name
+$servicePrincipal = Get-AzADServicePrincipal -ApplicationId $clientId
+
+# create service principal if it does not exist
+if (!$servicePrincipal) {
+    # Create new Service Principal
+    $servicePrincipal = New-AzADServicePrincipal -ApplicationId $clientId
+}
+
+$objectId = $servicePrincipal.Id
+
+# check if there is already the Contributor role assigned to the service principal
+$roleAssignment = Get-AzRoleAssignment -ObjectId $objectId -RoleDefinitionName Contributor
+if (!$roleAssignment) {
+    # Assign the Contributor Role
+    # This is assigned to the current Subscription
+    New-AzRoleAssignment -ObjectId $objectId -RoleDefinitionName Contributor
+}
 
 # Get the Identifiers later use for the workflow
 $subscriptionId = (Get-AzContext).Subscription.Id
@@ -51,12 +71,9 @@ $tenantId = (Get-AzContext).Subscription.TenantId
 # set the federatedIdentityCredentials to the Azure AD application
 New-AzADAppFederatedCredential -Name $repo$branch -ApplicationObjectId $appObjectId -Issuer "https://token.actions.githubusercontent.com" -Subject "repo:$organization/$repo:ref:refs/heads/$branch" -Audience "api://AzureADTokenExchange"
 
-#Invoke-AzRestMethod -Method POST -Uri 'https://graph.microsoft.com/beta/applications/$clientId/federatedIdentityCredentials' -Payload  '{"name":"GithubAction","issuer":"https://token.actions.githubusercontent.com","subject":"repo:$organization/$repo:ref:refs/heads/$branch","description":"Production","audiences":["api://AzureADTokenExchange"]}'
+Invoke-AzRestMethod -Method POST -Uri 'https://graph.microsoft.com/beta/applications/$clientId/federatedIdentityCredentials' -Payload  '{"name":"GithubAction","issuer":"https://token.actions.githubusercontent.com","subject":"repo:$organization/$repo:ref:refs/heads/$branch","description":"Production","audiences":["api://AzureADTokenExchange"]}'
 
-# Set secrets
-# AZURE_CLIENT_ID
-gh api -X PUT repos/$organization/$repo/actions/secrets/AZURE_CLIENT_ID -f value=$clientId
-# AZURE_TENANT_ID
-gh api -X PUT repos/$organization/$repo/actions/secrets/AZURE_TENANT_ID -f value=$tenantId
-# AZURE_SUBSCRIPTION_ID
-gh api -X PUT repos/$organization/$repo/actions/secrets/AZURE_SUBSCRIPTION_ID -f value=$subscriptionId
+# set the secrets
+gh secret set AZURE_CLIENT_ID -b $clientId -R $organization/$repo
+gh secret set AZURE_TENANT_ID -b $tenantId -R $organization/$repo
+gh secret set AZURE_SUBSCRIPTION_ID -b $subscriptionId -R $organization/$repo
