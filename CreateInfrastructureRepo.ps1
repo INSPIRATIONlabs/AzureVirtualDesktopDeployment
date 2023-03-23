@@ -33,12 +33,17 @@ gh auth login
 gh repo create $organization/$repo --private --confirm
 
 # check if there is already an app with the same name
-$application = (Get-AzADApplication -DisplayName $appname)[0]
+$application = (Get-AzADApplication -DisplayName $appname)
 
 # create application if it does not exist
 if (!$application) {
     # Create new Azure AD application
     $application = New-AzADApplication -DisplayName $appname
+}
+
+# if application exist and is array, take the first one
+if ($application -is [array]) {
+    $application = $application[0]
 }
 
 # Create Service Principal
@@ -70,10 +75,13 @@ $tenantId = (Get-AzContext).Subscription.TenantId
 
 $subject = "repo:$organization/$repo" + ":ref:refs/heads/$branch"
 
-# set the federatedIdentityCredentials to the Azure AD application
-New-AzADAppFederatedCredential -Name $repo$branch -ApplicationObjectId $appObjectId -Issuer "https://token.actions.githubusercontent.com" -Subject $subject -Audience "api://AzureADTokenExchange"
 
-# set the secrets
-gh secret set AZURE_CLIENT_ID -b $clientId -R $organization/$repo
-gh secret set AZURE_TENANT_ID -b $tenantId -R $organization/$repo
-gh secret set AZURE_SUBSCRIPTION_ID -b $subscriptionId -R $organization/$repo
+$fedcred = New-AzADAppFederatedCredential -Name $repo$branch -ApplicationObjectId $appObjectId -Issuer "https://token.actions.githubusercontent.com" -Subject $subject -Audience "api://AzureADTokenExchange"
+
+# only create the secrets if fedcred is created
+if ($fedcred) {
+    # set the secrets
+    gh secret set AZURE_CLIENT_ID -b $clientId -R $organization/$repo
+    gh secret set AZURE_TENANT_ID -b $tenantId -R $organization/$repo
+    gh secret set AZURE_SUBSCRIPTION_ID -b $subscriptionId -R $organization/$repo
+}
