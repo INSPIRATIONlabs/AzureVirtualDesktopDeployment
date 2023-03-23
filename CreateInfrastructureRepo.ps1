@@ -30,26 +30,21 @@ if (!(Get-Command gh -ErrorAction SilentlyContinue)) {
 gh auth login
 
 # Create new private github repository in the organization
-gh repo create $organization/$repo --private
-
-# Set the default branch
-gh api -X PATCH repos/$organization/$repo -f default_branch=$branch
+gh repo create $organization/$repo --private --confirm
 
 # Create new Azure AD application
-New-AzADApplication -DisplayName $appname
+$application = New-AzADApplication -DisplayName $appname
 
 # Create Service Principal
-$clientId = (Get-AzADApplication -DisplayName $appname).AppId
-$appObjectId = (Get-AzADApplication -DisplayName $appname).Id
-New-AzADServicePrincipal -ApplicationId $clientId
+$clientId = $application.AppId
+$appObjectId = $application.Id
+$objectId = New-AzADServicePrincipal -ApplicationId $clientId[0]
 
 # Assign the Contributor Role
 # This is assigned to the current Subscription
-$objectId = (Get-AzADServicePrincipal -DisplayName $appname).Id
 New-AzRoleAssignment -ObjectId $objectId -RoleDefinitionName Contributor
 
 # Get the Identifiers later use for the workflow
-$clientId = (Get-AzADApplication -DisplayName $appname).AppId
 $subscriptionId = (Get-AzContext).Subscription.Id
 $tenantId = (Get-AzContext).Subscription.TenantId
 
