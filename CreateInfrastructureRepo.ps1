@@ -30,7 +30,7 @@ if (!(Get-Command gh -ErrorAction SilentlyContinue)) {
 gh auth login
 
 # Create new private github repository in the organization
-gh repo create $repo --private --confirm --org $organization
+gh repo create $organization/$repo --private
 
 # Set the default branch
 gh api -X PATCH repos/$organization/$repo -f default_branch=$branch
