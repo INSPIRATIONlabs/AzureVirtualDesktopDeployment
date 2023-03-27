@@ -30,7 +30,7 @@ if (!(Get-Command gh -ErrorAction SilentlyContinue)) {
 gh auth login
 
 # Create new private github repository in the organization
-gh repo create $organization/$repo --private --confirm
+gh repo create $organization/$repo --private --confirm --template inspirationlabs/bicepdeploy-template
 
 # check if there is already an app with the same name
 $application = (Get-AzADApplication -DisplayName $appname)
