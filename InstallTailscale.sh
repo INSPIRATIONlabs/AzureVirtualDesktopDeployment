@@ -6,20 +6,41 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Check for required parameters
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <auth_key> <comma_separated_networks>"
+usage() {
+    echo "Usage: $0 --auth-key <auth_key> --networks <comma_separated_networks> [--enable-routing]"
     exit 1
-fi
+}
 
+# Set default values for parameters
+AUTH_KEY=""
+NETWORKS=""
 ENABLE_ROUTING=0
-if [ "$1" == "-r" ] || [ "$1" == "--enable-routing" ]; then
-    ENABLE_ROUTING=1
-    shift
-fi
 
-AUTH_KEY="$1"
-NETWORKS="$2"
+# Parse named parameters
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --auth-key)
+            AUTH_KEY="$2"
+            shift 2
+            ;;
+        --networks)
+            NETWORKS="$2"
+            shift 2
+            ;;
+        --enable-routing)
+            ENABLE_ROUTING=1
+            shift
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+# Check if required parameters are set
+if [ -z "$AUTH_KEY" ] || [ -z "$NETWORKS" ]; then
+    usage
+fi
 
 # Detect Ubuntu version
 UBUNTU_VERSION=$(lsb_release -sc)
