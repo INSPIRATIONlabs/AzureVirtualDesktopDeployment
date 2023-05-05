@@ -54,7 +54,11 @@ sudo apt-get update
 sudo apt-get install -y tailscale
 
 # Authenticate Tailscale and set up networks
-sudo tailscale up --authkey="${AUTH_KEY}" --advertise-routes="${NETWORKS}"
+if [ "$ENABLE_ROUTING" -eq 1 ]; then
+    sudo tailscale up --authkey="${AUTH_KEY}" --advertise-routes="${NETWORKS}" --accept-routes
+else
+    sudo tailscale up --authkey="${AUTH_KEY}" --advertise-routes="${NETWORKS}"
+fi
 
 # Enable routing if requested
 if [ "$ENABLE_ROUTING" -eq 1 ]; then
