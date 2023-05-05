@@ -12,6 +12,12 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
+ENABLE_ROUTING=0
+if [ "$1" == "-r" ] || [ "$1" == "--enable-routing" ]; then
+    ENABLE_ROUTING=1
+    shift
+fi
+
 AUTH_KEY="$1"
 NETWORKS="$2"
 
@@ -28,6 +34,13 @@ sudo apt-get install -y tailscale
 
 # Authenticate Tailscale and set up networks
 sudo tailscale up --authkey="${AUTH_KEY}" --advertise-routes="${NETWORKS}"
+
+# Enable routing if requested
+if [ "$ENABLE_ROUTING" -eq 1 ]; then
+    echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+    echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+    sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
+fi
 
 # Enable and start the Tailscale service
 sudo systemctl enable tailscale
