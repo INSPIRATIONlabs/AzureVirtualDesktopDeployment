@@ -18,7 +18,7 @@ $InstallerArgs = @(
     "`"$TailscalePath`"",
     "/quiet",
     "/norestart",
-    "Tgit pS_ADMINCONSOLE=hide",
+    "TS_ADMINCONSOLE=hide",
     "TS_ALLOWINCOMINGCONNECTIONS=always",
     "TS_KEYEXPIRATIONNOTICE=24h",
     "TS_NETWORKDEVICES=hide",
