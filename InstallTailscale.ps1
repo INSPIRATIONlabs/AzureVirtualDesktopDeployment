@@ -29,7 +29,7 @@ $InstallerArgs = @(
 Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArgs -Wait
 
 # Set the Tailscale authkey and start Tailscale
-& "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$Authkey --accept-routes
+& "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$Authkey --accept-routes --unattended
 
 # Clean up the downloaded MSI
 Remove-Item $TailscalePath
