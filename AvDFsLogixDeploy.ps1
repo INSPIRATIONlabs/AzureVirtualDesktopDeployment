@@ -54,14 +54,14 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\frxccd\Parameter
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\frxccd\Parameters" -Name "WriteCacheDirectory" -Value "D:\FSLogix\Cache" -force
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\frxccd\Parameters" -Name "CacheDirectory" -Value  "D:\FSLogix\Cache" -force
 
-
-# Store credentials to access the storage account
-cmdkey.exe /add:$fileserver /user:$($user) /pass:$($secret)
 # Disable Windows Defender Credential Guard (only needed for Windows 11 22H2)
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "LsaCfgFlags" -Value 0 -force
 
 Add-LocalGroupMember -Group "FSLogix ODFC Exclude List" -Member "azure"
 Add-LocalGroupMember -Group "FSLogix Profile Exclude List" -Member "azure"
+
+# Store credentials to access the storage account
+cmdkey.exe /add:`"$fileserver`" /user:`"$($user)`" /pass:`"$($secret)`"
 
 # Defender Exclusions for FSLogix
 $Cloudcache = $true # Set for true if using cloud cache
