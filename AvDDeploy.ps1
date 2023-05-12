@@ -1,24 +1,55 @@
-# Script to install fslogix on a Windows system and configure Microsoft Defender.
-# Based on the work of Marcel and his article: https://blog.itprocloud.de/Using-FSLogix-file-shares-with-Azure-AD-cloud-identities-in-Azure-Virtual-Desktop-AVD/
-# Modified by: Dominic Böttger
-#
-# Add Parameters for the script all parameters are mandatory
+# A script which installs multiple components on a Windows machine
+# Current installable components
+# - FSLogix
+# - Tailscale (optional)
+# 
+# Parameters for FslLogix installation are:
 # - fileServer: The name of the file server
 # - profileShare: The connection string to the profile share
 # - user: The user name to access the file server
 # - secret: The password to access the file server
+#
+# Parameters for Tailscale installation are:
+# - tailscaleKey: The key to access the Tailscale network
+# 
+# The tailscale installation is optional. If the tailscaleKey parameter is not provided, the installation will be skipped.
+#
 param(
     [Parameter(Mandatory=$true)]
-    [string]$fileserver,
+    [string]$fileServer,
     [Parameter(Mandatory=$true)]
-    [string]$profileshare,
+    [string]$profileShare,
     [Parameter(Mandatory=$true)]
     [string]$user,
     [Parameter(Mandatory=$true)]
     [string]$secret,
-    [Parameter(Mandatory=$true)]
-    [string]$sharename
+    [Parameter(Mandatory=$false)]
+    [string]$tailscaleAuthkey
 )
+
+# check all mandatory parameters
+if (-not $fileServer) {
+    Write-Error "fileServer parameter is missing."
+    Exit 1
+}
+
+if (-not $profileShare) {
+    Write-Error "profileShare parameter is missing."
+    Exit 1
+}
+
+if (-not $user) {
+    Write-Error "user parameter is missing."
+    Exit 1
+}
+
+if (-not $secret) {
+    Write-Error "secret parameter is missing."
+    Exit 1
+}
+
+# Install FSLogix
+Write-Host "Installing FSLogix"
 
 New-Item -Path "HKLM:\SOFTWARE" -Name "FSLogix" -ErrorAction Ignore
 New-Item -Path "HKLM:\SOFTWARE\FSLogix" -Name "Profiles" -ErrorAction Ignore
@@ -98,4 +129,32 @@ If ($Cloudcache){
     Add-MpPreference -ExclusionPath "D:\FSLogix\Proxy\*.VHD"
     Add-MpPreference -ExclusionPath "D:\FSLogix\Proxy\*.VHDX"}
 
-shutdown -r -t 0
+# check if the tailscaleAuthkey is set and if so, install tailscale
+if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
+    # Download the latest Tailscale client MSI
+    $TailscaleUrl = 'https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi'
+    $TailscalePath = "$env:TEMP\tailscale.msi"
+    Invoke-WebRequest -Uri $TailscaleUrl -OutFile $TailscalePath
+
+    # Install the Tailscale client using the MSI, allow incoming connections, and start Tailscale after installation
+    $InstallerArgs = @(
+        "/i",
+        "`"$TailscalePath`"",
+        "/quiet",
+        "/norestart",
+        "TS_ADMINCONSOLE=hide",
+        "TS_ALLOWINCOMINGCONNECTIONS=always",
+        "TS_KEYEXPIRATIONNOTICE=24h",
+        "TS_NETWORKDEVICES=hide",
+        "TS_TESTMENU=hide",
+        "TS_UPDATEMENU=hide",
+        "TS_UNATTENDEDMODE=always"
+    )
+    Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArgs -Wait
+
+    # Set the Tailscale authkey and start Tailscale
+    & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$Authkey --accept-routes --unattended
+
+    # Clean up the downloaded MSI
+    Remove-Item $TailscalePath
+}
