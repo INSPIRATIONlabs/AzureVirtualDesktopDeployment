@@ -157,6 +157,7 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
         "TS_KEYEXPIRATIONNOTICE=24h",
         "TS_NETWORKDEVICES=hide",
         "TS_TESTMENU=hide",
+        "TS_NOLAUNCH=true",
         "TS_UPDATEMENU=hide",
         "TS_UNATTENDEDMODE=always"
     )
