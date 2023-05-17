@@ -26,6 +26,8 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$sharename,
     [Parameter(Mandatory=$false)]
+    [string]$fsLogixPath = "D:\FSLogix",
+    [Parameter(Mandatory=$false)]
     [string]$tailscaleAuthkey
 )
 
@@ -45,7 +47,7 @@ if (-not $user) {
     Exit 1
 }
 
-if (-not $secret) {
+if (-not $secret || $secret.Length -lt 2)) {
     Write-Error "secret parameter is missing."
     Exit 1
 }
@@ -117,9 +119,12 @@ $processlist = `
 "%ProgramFiles%\FSLogix\Apps\frxsvc.exe"
 
 Foreach($item in $filelist){
-    Add-MpPreference -ExclusionPath $item}
-Foreach($item in $processlist){
-    Add-MpPreference -ExclusionProcess $item}
+    Add-MpPreference -ExclusionPath $item
+}
+
+    Foreach($item in $processlist){
+    Add-MpPreference -ExclusionProcess $item
+}
 
 If ($Cloudcache){
     Add-MpPreference -ExclusionPath "%ProgramData%\FSLogix\Cache\*.VHD"
@@ -129,7 +134,8 @@ If ($Cloudcache){
     Add-MpPreference -ExclusionPath "D:\FSLogix\Cache\*.VHD"
     Add-MpPreference -ExclusionPath "D:\FSLogix\Cache\*.VHDX"
     Add-MpPreference -ExclusionPath "D:\FSLogix\Proxy\*.VHD"
-    Add-MpPreference -ExclusionPath "D:\FSLogix\Proxy\*.VHDX"}
+    Add-MpPreference -ExclusionPath "D:\FSLogix\Proxy\*.VHDX"
+}
 
 # check if the tailscaleAuthkey is set and if so, install tailscale
 if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
