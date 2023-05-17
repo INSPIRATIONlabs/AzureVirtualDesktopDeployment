@@ -140,6 +140,8 @@ Write-Host "FSLogix Exclusions added"
 
 # check if the tailscaleAuthkey is set and if so, install tailscale
 if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
+    # check if tailscale is installed
+    $tailscaleInstalled = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Tailscale" -Name "DisplayName" -ErrorAction SilentlyContinue
     Write-Host "Downloading Tailscale..."
     # Download the latest Tailscale client MSI
     $TailscaleUrl = 'https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi'
@@ -164,6 +166,10 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
     Write-Host "Excecuting: msiexec.exe for tailscale"
     Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArgs -Wait
     Write-Host "Tailscale installed"
+    if ($tailscaleInstalled -ne $null) {
+        Write-Host "Tailscale already installed, shutdown"
+        & "C:\Program Files\Tailscale\tailscale.exe" down
+    }
     # Set the Tailscale authkey and start Tailscale
     & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=`"$Authkey`" --accept-routes --unattended
     Write-Host "Tailscale started"
