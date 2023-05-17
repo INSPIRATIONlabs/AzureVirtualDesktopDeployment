@@ -165,7 +165,7 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
 
     Write-Host "Tailscale installed"
     # Set the Tailscale authkey and start Tailscale
-    $outScale = & {tailscale.exe up --authkey=`"$tailscaleAuthkey`" --accept-routes --unattended 2>&1} 
+    $outScale = & {tailscale.exe up --authkey=$tailscaleAuthkey --accept-routes --unattended 2>&1} 
     Write-Host $outScale
 
     # Clean up the downloaded MSI
