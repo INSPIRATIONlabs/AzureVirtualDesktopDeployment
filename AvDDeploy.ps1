@@ -122,7 +122,7 @@ Foreach($item in $filelist){
     Add-MpPreference -ExclusionPath $item
 }
 
-    Foreach($item in $processlist){
+Foreach($item in $processlist){
     Add-MpPreference -ExclusionProcess $item
 }
 
@@ -136,14 +136,17 @@ If ($Cloudcache){
     Add-MpPreference -ExclusionPath "D:\FSLogix\Proxy\*.VHD"
     Add-MpPreference -ExclusionPath "D:\FSLogix\Proxy\*.VHDX"
 }
+Write-Host "FSLogix Exclusions added"
 
 # check if the tailscaleAuthkey is set and if so, install tailscale
 if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
+    Write-Host "Downloading Tailscale..."
     # Download the latest Tailscale client MSI
     $TailscaleUrl = 'https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi'
     $TailscalePath = "$env:TEMP\tailscale.msi"
     Invoke-WebRequest -Uri $TailscaleUrl -OutFile $TailscalePath
 
+    Write-Host "Installing Tailscale..."
     # Install the Tailscale client using the MSI, allow incoming connections, and start Tailscale after installation
     $InstallerArgs = @(
         "/i",
@@ -158,14 +161,16 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
         "TS_UPDATEMENU=hide",
         "TS_UNATTENDEDMODE=always"
     )
+    Write-Host "Excecuting: msiexec.exe for tailscale"
     Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArgs -Wait
-
+    Write-Host "Tailscale installed"
     # Set the Tailscale authkey and start Tailscale
     & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=`"$Authkey`" --accept-routes --unattended
-
+    Write-Host "Tailscale started"
     # Clean up the downloaded MSI
     Remove-Item $TailscalePath
 }
 
+Write-Host "Restarting..."
 # Restart to finish the installation
 shutdown -r -t 0
