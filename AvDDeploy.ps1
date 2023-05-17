@@ -23,6 +23,8 @@ param(
     [string]$user,
     [Parameter(Mandatory=$true)]
     [string]$secret,
+    [Parameter(Mandatory=$true)]
+    [string]$sharename,
     [Parameter(Mandatory=$false)]
     [string]$tailscaleAuthkey
 )
