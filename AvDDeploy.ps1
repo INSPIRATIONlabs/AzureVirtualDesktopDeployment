@@ -140,20 +140,12 @@ Write-Host "FSLogix Exclusions added"
 
 # check if the tailscaleAuthkey is set and if so, install tailscale
 if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
-    # check if tailscale is installed by checkig the file path C:\Program Files\Tailscale\tailscale.exe
-    $tailscaleInstalled = Test-Path -Path "C:\Program Files\Tailscale\tailscale.exe"
-    if($tailscaleInstalled -eq $true) {
-        Write-Output "Uninstalling tailscale"
-        # uninstall tailscale
-        msiexec /x "{CB4C09BA-9991-56F8-BE03-066A849317E7}" /quiet /norestart
-    }
-    Write-Host "Downloading Tailscale..."
+        
     # Download the latest Tailscale client MSI
     $TailscaleUrl = 'https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi'
     $TailscalePath = "$env:TEMP\tailscale.msi"
     Invoke-WebRequest -Uri $TailscaleUrl -OutFile $TailscalePath
 
-    Write-Host "Installing Tailscale..."
     # Install the Tailscale client using the MSI, allow incoming connections, and start Tailscale after installation
     $InstallerArgs = @(
         "/i",
@@ -168,17 +160,11 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
         "TS_UPDATEMENU=hide",
         "TS_UNATTENDEDMODE=always"
     )
-    Write-Host "Excecuting: msiexec.exe for tailscale"
     Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArgs -Wait
-    Write-Host "Tailscale installed"
-    if ($tailscaleInstalled -ne $null) {
-        Write-Host "Tailscale already installed, shutdown"
-        & "C:\Program Files\Tailscale\tailscale.exe" down
-    }
+
     # Set the Tailscale authkey and start Tailscale
-    $tailscaleStartup = $(& "C:\Program Files\Tailscale\tailscale.exe" up --authkey=`"$($tailscaleAuthkey)`" --accept-routes --unattended)
-    Write-Host "Tailscale startup: $tailscaleStartup"
-    Write-Host "Tailscale started"
+    & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$tailscaleAuthkey --accept-routes --unattended
+
     # Clean up the downloaded MSI
     Remove-Item $TailscalePath
 }
