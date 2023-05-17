@@ -176,7 +176,8 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
         & "C:\Program Files\Tailscale\tailscale.exe" down
     }
     # Set the Tailscale authkey and start Tailscale
-    & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=`"$($tailscaleAuthkey)`" --accept-routes --unattended
+    $tailscaleStartup = $("C:\Program Files\Tailscale\tailscale.exe" up --authkey=`"$($tailscaleAuthkey)`" --accept-routes --unattended)
+    Write-Host "Output: $tailscaleStartup"
     Write-Host "Tailscale started"
     # Clean up the downloaded MSI
     Remove-Item $TailscalePath
