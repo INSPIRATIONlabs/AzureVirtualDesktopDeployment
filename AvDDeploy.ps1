@@ -142,6 +142,11 @@ Write-Host "FSLogix Exclusions added"
 if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
     # check if tailscale is installed by checkig the file path C:\Program Files\Tailscale\tailscale.exe
     $tailscaleInstalled = Test-Path -Path "C:\Program Files\Tailscale\tailscale.exe"
+    if($tailscaleInstalled -eq $true) {
+        Write-Output "Uninstalling tailscale"
+        # uninstall tailscale
+        msiexec /x "{CB4C09BA-9991-56F8-BE03-066A849317E7}" /quiet /norestart
+    }
     Write-Host "Downloading Tailscale..."
     # Download the latest Tailscale client MSI
     $TailscaleUrl = 'https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi'
