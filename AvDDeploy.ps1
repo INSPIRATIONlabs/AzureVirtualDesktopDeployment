@@ -47,7 +47,7 @@ if (-not $user) {
     Exit 1
 }
 
-if (-not $secret -and $secret.Length -lt 2)) {
+if (-not $secret -and $secret.Length -lt 2) {
     Write-Error "secret parameter is missing."
     Exit 1
 }
