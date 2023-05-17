@@ -163,8 +163,9 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
     Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArgs -Wait
 
     # Set the Tailscale authkey and start Tailscale
-    & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$tailscaleAuthkey --accept-routes --unattended
-
+    $outScale = & {"C:\Program Files\Tailscale\tailscale.exe" login --authkey=$tailscaleAuthkey --accept-routes --unattended 2>&1} 
+    Write-Host $outScale
+    
     # Clean up the downloaded MSI
     Remove-Item $TailscalePath
 }
