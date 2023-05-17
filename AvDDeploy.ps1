@@ -157,7 +157,6 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
         "TS_KEYEXPIRATIONNOTICE=24h",
         "TS_NETWORKDEVICES=hide",
         "TS_TESTMENU=hide",
-        "TS_NOLAUNCH=true",
         "TS_UPDATEMENU=hide",
         "TS_UNATTENDEDMODE=always"
     )
@@ -165,7 +164,7 @@ if( ($tailscaleAuthkey -ne $null) -and ($tailscaleAuthkey -ne "" )) {
 
     Write-Host "Tailscale installed"
     # Set the Tailscale authkey and start Tailscale
-    $outScale = & {tailscale.exe up --authkey=$tailscaleAuthkey --accept-routes --unattended 2>&1} 
+    $outScale =  & {& "$env:programfiles\tailscale\tailscale.exe" up --authkey=$tailscaleAuthkey --accept-routes --unattended 2>&1} 
     Write-Host $outScale
 
     # Clean up the downloaded MSI
