@@ -95,6 +95,8 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "LsaCf
 
 Add-LocalGroupMember -Group "FSLogix ODFC Exclude List" -Member "azure"
 Add-LocalGroupMember -Group "FSLogix Profile Exclude List" -Member "azure"
+Add-LocalGroupMember -Group "FSLogix ODFC Exclude List" -Member "defaultuser100000"
+Add-LocalGroupMember -Group "FSLogix Profile Exclude List" -Member "defaultuser100000"
 
 # Store credentials to access the storage account
 cmdkey.exe /add:`"$fileserver`" /user:`"$($user)`" /pass:`"$($secret)`"
