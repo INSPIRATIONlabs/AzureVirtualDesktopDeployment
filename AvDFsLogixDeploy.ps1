@@ -47,6 +47,7 @@ New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "IncludeOutl
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "IncludeOutlookPersonalization" -Value 1 -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "IsDynamic" -Value 1 -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "PreventLoginWithFailure" -Value 1 -force
+New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "IncludeTeams" -Value 1 -force
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\FSLogix\ODFC" -Name "VolumeType" -Value "VHDX" -force
 
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\frxccds\Parameters" -Name "ProxyDirectory" -Value "D:\FSLogix\Proxy" -force
